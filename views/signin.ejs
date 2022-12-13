@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('utils/head'); %>
+<script>
+
+  const forms = document.querySelectorAll('.needs-validation')
+
+  // Loop over them and prevent submission
+  Array.from(forms).forEach(form => {
+    form.addEventListener('submit', event => {
+      form.classList.add('was-validated')
+    }, false)
+  })
+
+  function showToast (id = 'toast', msg) {
+    const toast = document.getElementById(id)
+    if (msg) toast.children[0].innerText = msg
+
+    const instance = new bootstrap.Toast(toast)
+    instance.show()
+    setTimeout(() => {
+      instance.hide()
+    }, 2000)
+  }
+
+  function signin () {
+    try {
+      const form = document.getElementById('signin-form')
+      const username = form.username.value
+      const password = form.password.value
+      const res = signinApi(username, password).then(res => {
+        if (res.code === 500) {
+          showToast('toast', res.msg)
+        } else if (res.code === 200 || res.code === 302) {
+          document.cookie=`token=${res.data.token}`
+          localStorage.setItem('token', res.data.token)
+          let nextPage = '<%= nextPage %>'
+          console.log(nextPage)
+          if (nextPage) window.open(nextPage, '_self')
+          else window.open('/', '_self')
+        }
+      }).catch(err => {
+        // showToast('toast')
+      })
+      
+      return false
+    } catch (error) {
+      console.log(error)
+      return false
+    }
+  }
+
+</script>
+</head>
+<body>
+
+<div class="container-fluid bg-3 text-center">
+  <div aria-live="polite" aria-atomic="true" class="bg-dark position-relative bd-example-toasts">
+    <div class="toast-container top-0 start-50 translate-middle-x p-5">
+      <div id="toast" class="toast">
+        <div class="toast-body" style="color: red;">
+          Incorrect Username or Password!
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div aria-live="polite" aria-atomic="true" class="bg-dark position-relative bd-example-toasts">
+    <div class="toast-container top-0 start-50 translate-middle-x p-5">
+      <div id="ok-toast" class="toast">
+        <div class="toast-body" style="color: green;">
+          Successfully Signed In!
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3><%= page %></h3><br>
+  <form class="sign-form row g-3" id="signin-form" onsubmit="return signin()">
+    <div class="row-md-1 col-sm-6">
+      <label for="validationCustomUsername" class="form-label">Username</label>
+      <div class="input-group has-validation">
+        <span class="input-group-text" id="inputGroupPrepend">@</span>
+        <input
+          type="text"
+          class="form-control"
+          id="validationUsername"
+          aria-describedby="inputGroupPrepend"
+          name="username"
+          required
+        >
+        <div class="invalid-feedback">
+          Please input a username.
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6">
+      <label for="validationCustomUsername" class="form-label">Password</label>
+      <div class="input-group has-validation">
+        <span class="input-group-text" id="inputGroupPrepend">@</span>
+        <input
+          type="password"
+          class="form-control"
+          id="validationPassword"
+          aria-describedby="inputGroupPrepend"
+          name="password"
+          required
+        >
+        <div class="invalid-feedback">
+          Please input a password.
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-6" style="display: flex; justify-content: space-between; align-items: center;">
+      <a href="/signup"> Do not have an account?</a>
+      <button class="btn btn-primary" type="submit">Sign In</button>
+    </div>
+  </form>
+</div>
+</body>
+
+</html>

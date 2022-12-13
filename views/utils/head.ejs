@@ -1,0 +1,84 @@
+<title>Nailit Forum</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+<link rel="stylesheet" href="/styles/index.css">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+<script>
+  // import axios from 'axios'
+  const http = axios.create({
+    baseURL: '/api/v1',
+    timeout: 5000,
+    withCredentials: true, // cookies
+  })
+  http.defaults.headers.post['Content-Type'] = 'application/json'
+
+  http.interceptors.response.use(
+    (response) => {
+      const { data } = response
+      const { code } = data
+      switch (code) {
+      case 0:
+        return data
+      case 403: // not authorized
+        // token error
+        // eslint-disable-next-line no-console
+        // TODO
+        alert('no auth')
+        window.open('/signin', '_self')
+        return data
+      default:
+        return data
+      }
+    },
+    (error) => error.response.data,
+  )
+
+  function getCookie(cname) {
+    const name = cname + '='
+    const ca = document.cookie.split(';')
+    for(let i = 0; i < ca.length; i++) {
+      const c = ca[i].trim()
+      if (c.indexOf(name) == 0) return c.substring(name.length,c.length)
+    }
+    return '';
+  }
+
+  function signupApi (username, password) {
+    return http.post('signup', { username, password })
+  }
+
+  function signinApi (username, password) {
+    return http.post('login', { username, password })
+  }
+  
+  function logoutApi () {
+    return http.post('logout')
+  }
+
+  function postApi (title, content, images) {
+    return http.post('post', { title, content, images })
+  }
+
+  function getPostsApi () {
+    return http.get('post')
+  }
+
+  function deletePostApi (postId) {
+    return http.delete(`post/${postId}`)
+  }
+  
+  function postCommentApi (content, postId, commentId) {
+    return http.post('comment', { content, postId, commentId })
+  }
+  
+  function postLikeApi (postId) {
+    return http.post('like', { postId })
+  }
+  
+  function postDislikeApi (postId) {
+    return http.post('dislike', { postId })
+  }
+
+</script>
