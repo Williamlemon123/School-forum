@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <%- include('utils/head'); %>
+</head>
+<style>
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .page {
+    background-color: #111;
+    width: 100vw;
+    overflow-x: hidden;
+    color: #dfdfdf;
+    min-height: 100vh;
+    padding-bottom: 100px;
+    min-width: 280px;
+  }
+  .content {
+    width: 80%;
+    min-width: 300px;
+    max-width: 1000px;
+    overflow: hidden;
+    margin: auto;
+  }
+  .post-container {
+    padding: 5px 10px;
+    cursor: default;
+    position: relative;
+    
+  }
+  .post-container .title {
+    font-size: 24px;
+    font-weight: 500;
+    margin: 20px 0 5px;
+    color: white;
+  }
+  .post-container .author {
+    color: #999;
+    font-size: 15px;
+  }
+  .post-container .username {
+    color: #23ade5;
+  }
+
+  .post-container .content {
+    color: #e5e5e5;
+    font-size: 16px;
+    text-align: left;
+    margin: 10px 0;
+  }
+
+  .post-container .status {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    font-size: 14px;
+    color: #c4c4c4;
+    padding: 6px 0;
+    margin: 10px 0;
+    width: 100%;
+    border-top: 1px solid #333;
+    border-bottom: 1px solid #333;
+  }
+
+  .post-container .status img {
+    width: 20px;
+    height: 20px;
+  }
+
+  .post-container .status .views span {
+    color: #fb7299;
+  }
+
+  .post-container .operations {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+
+  .post-container .operations .like, .post-container .operations .comment {
+    margin-left: 30px;
+    cursor: pointer;
+  }
+  .post-container .operations .like:hover, .post-container .operations .comment:hover {
+    color: #999;
+  }
+  
+  .comment-container {
+    font-size: 14px;
+    color: c4c4c4;
+  }
+  
+  .comment-container .comment .main {
+    cursor: pointer;
+    padding: 5px 10px;
+  }
+  
+  .comment-container .comment .main:hover {
+    background-color: #212121;
+    border-radius: 5px;
+  }
+  
+  .comment-container .comment .sub {
+    padding-left: 40px;
+  }
+  
+  .comment-container .comment .author {
+    color: #666;
+  }
+  .username {
+    color: #23ade5;
+  }
+  
+  .images {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  
+  .images img {
+    max-width: 180px;
+    height: 180px;
+    margin-left: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+  }
+
+  .delete {
+    position: absolute;
+    right: 0px;
+    top: 20px;
+    z-index: 11;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+  }
+  .confirm {
+    position: absolute;
+    right: 0px;
+    top: 60px;
+    z-index: 11;
+    cursor: pointer;
+    font-size: 12px;
+    background-color: #f5f5f5;
+    color: #333;
+    padding: 5px 10px;
+    border-radius: 5px;
+  }
+  .confirm.hidden {
+    visibility: hidden;
+  }
+  .yes, .no {
+    padding: 0 5px;
+  }
+  .yes:hover {
+    color: red;
+  }
+  
+  .no:hover {
+    color: #666;
+  }
+  
+  .delete img {
+    width: 15px;
+    height: 15px;
+  }
+  
+  @media only screen and (max-width: 500px) {
+    .images img {
+      max-width: 120px;
+      height: 120px;
+    }
+  }
+  
+  @media only screen and (min-width: 1100px) {
+    .post-container .title {
+      font-size: 27px;
+      font-weight: 600;
+    }
+    .post-container .author {
+      font-size: 16px;
+    }
+    .post-container .content {
+      font-size: 18px;
+    }
+    .post-container .status {
+      font-size: 17px;
+    }
+    .post-container .status img {
+      width: 23px;
+      height: 23px;
+    }
+    .comment-container {
+      font-size: 16px;
+    }
+    .post-container .status {
+      padding: 12px 0;
+    }
+    .delete img {
+      width: 18px;
+      height: 18px;
+    }
+    .confirm {
+      top: 65px;
+      font-size: 15px;
+    }
+    .images img {
+      max-width: 250px;
+      height: 250px;
+      margin-left: 20px;
+      border-radius: 10px;
+    }
+
+  }
+
+</style>
+<body>
+  <%- include('utils/header', { user }); %>
+<div class="page">   
+  <div class="content">
+    <div class="post-container">
+      <% if (user.role == 'admin' || post.author.id == user.id) { %>
+        <div class="delete" onclick="confirmDelete(true)">
+          <img src="https://cdn.glitch.global/c10e59dc-646a-4d60-89f8-8e987ed1d113/delete.png?v=1670902721596" />
+        </div>
+        <div class="confirm hidden" id="confirm">
+          Are you sure to delete this post?
+          <span class="yes" onclick="deletePost('<%= post.id %>')"> Yes </span>
+          <span class="no" onclick="confirmDelete(false)"> No </span>
+        </div> 
+      <% } %>
+      <div class="title">
+        <%= post.title %>
+      </div>
+      <div class="author">
+        <span class="username"> <%= post.author.username == user.username ? 'You' : post.author.username %> <%= post.author.role === 'admin' ? '(Admin)' : '' %> </span> posted on  <%= post.created_at %>
+      </div>
+          
+      <div class="content">
+        <%= post.content %>
+      </div>  
+        
+      <div class="images">
+        <% for (let i = 0; i < post.images.length; i++) { %>
+          <img src='<%= post.images[i].data %>' >
+        <% }  %>
+      </div>  
+      
+      <div class="status">
+        <div class="views">
+          <span> <%= post.views.total %> </span> views
+        </div>
+        <div class="operations">
+          
+          <!-- comment -->
+          <div class="comment" onclick="writeToReply('<%= post.id %>', null, 'To author')">
+            <img src="https://cdn.glitch.global/c10e59dc-646a-4d60-89f8-8e987ed1d113/comment.png?v=1670902844936" />
+            <%= post.comments.length %>
+          </div>
+            
+          <!-- like -->
+          <div class="like">
+            <% if (post.likes.liked) { %>
+              <img src="https://cdn.glitch.global/c10e59dc-646a-4d60-89f8-8e987ed1d113/like-hl.png?v=1670894919195" onclick="dislike('<%= post.id %>')" />
+            <% } %>
+            <% if (!post.likes.liked) { %>
+              <img src="https://cdn.glitch.global/c10e59dc-646a-4d60-89f8-8e987ed1d113/like.png?v=1670894919195" onclick="like('<%= post.id %>')" />
+            <% } %>
+            <%= post.likes.total %>
+          </div>
+              
+
+        </div>
+      </div>
+    </div>
+
+    <div class="comment-container" style="min-height: 200px;">
+      <% for (let i = 0; i < post.comments.length; i++) { %>
+      <div class="comment">
+        <div class="main" onclick="writeToReply('<%= post.id %>', '<%= post.comments[i].id %>', 'To &nbsp; <span class=\'username\'>@' + '<%= post.comments[i].author.username %>' + '</span>')">
+          <div class="author">
+            <span class="username">
+              <%=  post.comments[i].author.username == user.username ? 'You' : '@' + post.comments[i].author.username + (post.comments[i].author.role === 'admin' ? '(Admin)' : '') %>
+            </span> replied
+            <span class="username">
+              <%= post.author.username == user.username ? ' to You' : 'to @' + post.author.username + (post.author.role === 'admin' ? '(Admin)' : '') %>
+            </span>
+              on  <%= post.comments[i].created_at %>
+          </div>
+          <div>
+            <%= post.comments[i].content %>    
+          </div>
+        </div>
+        <div class="sub">
+          <% for (let j = 0; j < post.comments[i].subComments.length; j++) { %>
+            <div class="author">
+              <span class="username">
+                <%=  post.comments[i].subComments[j].author.username == user.username
+                   ? 'You'
+                   : '@' + post.comments[i].subComments[j].author.username + (post.comments[i].subComments[j].author.role === 'admin' ? '(Admin)' : '')
+                %>
+              </span> replied on <%= post.comments[i].subComments[j].created_at %>
+            </div>
+            <div>
+              <%= post.comments[i].subComments[j].content %>    
+            </div>
+          <% } %>
+        </div>
+        
+      </div>                                  
+      <% } %>
+    </div>
+  </div>
+  <!-- <button type="button" class="btn btn-dark" onclick="addNewPost()"> New Posts </button> -->
+</div>
+<%- include('utils/commentbar'); %>
+  <script>
+    
+    async function dislike (id) {
+      try {
+        const res = await postDislikeApi(id)
+        if (res.code === 201) {
+          document.location.reload()
+        }
+      } catch (e) {
+        showToast('toast', e.msg || 'Error Occurred')
+      }
+    }
+    
+    async function like (id) {
+      try {
+        const res = await postLikeApi(id)
+        if (res.code === 201) {
+          document.location.reload()
+        }
+      } catch (e) {
+        showToast('toast', e.msg || 'Error Occurred')
+      }
+    }
+    
+    function getDate (ts) {
+      const date = new Date(ts)
+      return date.toLocaleDateString() + ' ' + date.getHours() + ':' + date.getMinutes()
+    }
+    
+    function writeToReply (pid, cid, authorName) {
+      const input = document.getElementById('validationComment')
+      const prepend = document.getElementById('inputGroupPrepend')
+      input.value = ''
+      prepend.innerHTML = authorName
+      postId = pid
+      commentId = cid
+      const bar = document.getElementById('comment-bar-container')
+      bar.classList.remove('hidden')
+      focusBar()
+    }
+    
+    function confirmDelete (showConfirm) {
+      const confirm = document.getElementById('confirm')
+      if (showConfirm) {
+        confirm.classList.remove('hidden')
+      } else {
+        confirm.classList.remove('hidden')
+        confirm.classList.add('hidden')
+      }
+    }
+    
+    async function deletePost (id) {
+      try {
+        const confirm = document.getElementById('confirm')
+        confirm.classList.remove('hidden')
+        confirm.classList.add('hidden')
+        const res = await deletePostApi(id)
+        if (res.code === 200) {
+          window.open('/', '_self')
+        }
+      } catch (e) {
+        showToast('toast', e.msg || 'Error Occurred')
+      }
+    }
+    
+  </script>
+</body>
+
+</html>

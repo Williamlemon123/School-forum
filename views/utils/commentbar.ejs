@@ -1,0 +1,142 @@
+<html lang="en">
+  <style>
+    #comment-bar-container {
+      position: fixed;
+      bottom: 100px;
+      left: 0px;
+      text-align: center;
+      width: 100vw;
+      min-width: 375px;
+      transition: 0.5s ease;
+    }
+    #comment-bar-container.hidden {
+      bottom: -200px;
+    }
+    .comment-form {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+    }
+    #comment-toast {
+      position: fixed;
+      top: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 50%;
+      min-width: 200px;
+      min-height: 40px;
+    }
+    .comment-bar-container .toast-body {
+      color: red;
+    }
+    .comment-bar-container .toast-body.good {
+      color: green;
+    }
+  </style>
+  
+  <body>
+    <div id="comment-bar-container" class="hidden">
+      <div class="toast-container" id="comment-toast">
+        <div id="toast" class="toast">
+          <div class="toast-body">
+            Error Occurred!
+          </div>
+        </div>
+      </div>
+      <form class="comment-form row g-3" id="comment-form" onsubmit="return makeComment('<%= post.id %>')">
+          <div class="row-md-1 col-sm-8">
+            <div class="input-group has-validation">
+              <span class="input-group-text" id="inputGroupPrepend">To author</span>
+              <input
+                type="text"
+                class="form-control"
+                id="validationComment"
+                aria-describedby="inputGroupPrepend"
+                name="comment"
+                onblur="onBlur()"
+                required
+              >
+              <button type="submit" class="btn btn-dark"> Make Comment </button>
+              <div class="invalid-feedback">
+                Please input a comment between 1 to 150 words.
+              </div>
+            </div>
+          </div>
+      </form>
+    </div>
+    <script>
+      let replyType = 0 // 0: to post 1: to comment
+      let postId = ''
+      let commentId = null
+      
+      const forms = document.querySelectorAll('.needs-validation')
+      // Loop over them and prevent submission
+      Array.from(forms).forEach(form => {
+        form.addEventListener('submit', event => {
+          form.classList.add('was-validated')
+        }, false)
+      })
+  
+      function makeComment () {
+        try {
+          const form = document.getElementById('comment-form')
+          const content = form.comment.value
+          const res = postCommentApi(content, postId, commentId).then(res => {
+            if (res.code === 500) {
+              showToast('toast', res.msg)
+            } else if (res.code === 201) {
+              hideBar()
+              document.location.reload() // refresh to fetch latest data
+            }
+          }).catch(err => {
+            showToast('toast, \'Error Occurred!')
+          })
+          return false
+        } catch (error) {
+          showToast('toast', error.msg)
+          return false
+        }
+      }
+      
+      function onBlur () {
+        hideBar()
+      }
+      
+      function focusBar () {
+        const input = document.getElementById('validationComment')
+        input.focus()
+      }
+      
+      function hideBar () {
+        const bar = document.getElementById('comment-bar-container')
+        bar.classList.remove('hidden')
+        bar.classList.add('hidden')
+      }
+      
+      function showBar () {
+        const bar = document.getElementById('comment-bar-container')
+        bar.classList.remove('hidden')
+      }
+    
+      
+      function showToast (id = 'toast', msg, good = false) {
+        const toast = document.getElementById(id)
+        if (msg) toast.children[0].innerText = msg
+        if (good) {
+          toast.children[0].classList.remove('good')
+          toast.children[0].classList.add('good')
+        } else {
+          toast.children[0].classList.remove('good')
+        }
+
+        const instance = new bootstrap.Toast(toast)
+        instance.show()
+        setTimeout(() => {
+          instance.hide()
+        }, 2000)
+      }
+  
+
+  </script>
+  </body>
+</html>

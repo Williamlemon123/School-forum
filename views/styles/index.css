@@ -1,0 +1,19 @@
+body {
+  background: #121212;
+}
+
+.sign-form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  position: relative;
+  top: 90px;
+  font-size: 17px;
+}
+
+h3 {
+  color: white;
+  margin-top: 160px;
+}

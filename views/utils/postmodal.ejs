@@ -1,0 +1,204 @@
+<html lang="en">
+  <style>
+    #modal-container.hidden {
+      visibility: hidden;
+    }
+    #modal-container.hidden #a-modal {
+      visibility: hidden;
+    }
+    #modal-container.hidden #modal-mask {
+      visibility: hidden;
+    }
+    #modal-container {
+      color: #f5f5f5;
+      position: fixed;
+      left: 0;
+      top: 0;
+      height: 100vh;
+      width: 100vw;
+      z-index: 12;
+    }
+    .mask {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: 100vw;
+      z-index: 10;
+    }
+    .a-modal {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 70%;
+      min-width: 300px;
+      max-width: 700px;
+      min-height: 500px;
+      max-height: 600px;
+      background-color: #212121;
+      overflow: scroll;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: #000 4px 4px 18px 8px;
+      z-index: 11;
+    }
+    .post-form {
+      width: 100%;
+      min-width: 300px;
+      max-width: 1000px;
+      margin: auto;
+      display: flex;
+      flex-dircetion: column;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin: 30px auto 20px;
+      text-align: center;
+      color: #fb7299;
+    }
+    .back {
+      cursor: pointer;
+    }
+    .back:hover {
+      color: #777;
+    }
+  </style>
+  <body>
+    <div class="modal-container hidden" id="modal-container">
+      <div class="mask" id="modal-mask">
+      </div>
+      <div class="a-modal" id="a-modal">
+        <div class="modal-title"> Write Your Post </div>
+        <form class="post-form row" id="post-form" onsubmit="return post()">
+          <div class="row-md-1 col-sm-8">
+            <label for="validationCustomTitle" class="form-label">Title</label>
+            <div class="input-group has-validation">
+              <input
+                type="text"
+                class="form-control"
+                id="validationTitle"
+                aria-describedby="inputGroupPrepend"
+                name="title"
+                required
+              >
+              <div class="invalid-feedback">
+                Please input a title(1 ~ 100 words).
+              </div>
+            </div>
+          </div>
+      
+          <div class="col-sm-8">
+            <label for="validationCustomContent" class="form-label">Content</label>
+            <div class="input-group has-validation">
+              <textarea
+                type="text"
+                class="form-control"
+                id="validationContent"
+                aria-describedby="inputGroupPrepend"
+                name="content"
+                required
+              >
+              </textarea>
+              <div class="invalid-feedback">
+                Please input content...
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-sm-8">
+            <label for="validationCustomContent" class="form-label">Images</label>
+            <%- include('./uploader'); %>  
+          </div>
+
+          <div class="col-sm-8" style="display: flex; justify-content: space-between; align-items: center; margin: 20px 0;">
+            <span class="back" onclick="clearAndBack()"> Clear & Go back </span>
+            <button class="btn btn-dark" type="submit" style="color: #23ade5; box-shadow: #000 4px 4px 18px 3px;" onclick="return post()"> Post Now </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <script>
+      let title = ''
+      let content = ''
+      const forms = document.querySelectorAll('.needs-validation')
+      // Loop over them and prevent submission
+      Array.from(forms).forEach(form => {
+        form.addEventListener('submit', event => {
+          form.classList.add('was-validated')
+        }, false)
+      })
+  
+      function post () {
+        try {
+          const form = document.getElementById('post-form')
+          const title = form.title.value
+          const content = form.content.value
+          const images = []
+          for (let i = 0; i < files.length; i++) {
+            images.push({
+              data: fileData[i],
+              type: files[i].type,
+            })
+          }
+          
+          const res = postApi(title, content, images).then(res => {
+            if (res.code === 500) {
+              // showToast('toast, res.msg)
+            } else if (res.code === 201) {
+              clearAndBack()
+              document.location.reload()
+            }
+          }).catch(err => {
+            // showToast('toast, \'Error Occurred!')
+          })
+          
+          return false
+        } catch (error) {
+          console.log(error)
+          return false
+        }
+      }
+  
+      const mask = document.getElementById('modal-mask')
+      mask.addEventListener('click', (e) => {
+        console.log(e)
+        const form = document.getElementById('post-form')
+        const title = form.title.value
+        const content = form.content.value
+        hideModal()
+      }, false)
+    
+      function hideModal () {
+        const modalContainer = document.getElementById('modal-container')
+        const form = document.getElementById('post-form')
+        title = form.title.value
+        content = form.content.value
+        modalContainer.classList.remove('hidden')
+        modalContainer.classList.add('hidden')
+      }
+
+      function showModal () {
+        const modalContainer = document.getElementById('modal-container')
+        modalContainer.classList.remove('hidden')
+        const form = document.getElementById('post-form')
+        form.title.value = title
+        form.content.value = content
+      }
+    
+      function clearAndBack () {
+        const form = document.getElementById('post-form')
+        form.reset()
+        form.title.value = ''
+        form.content.value = ''
+        hideModal()
+      }
+  
+  
+      
+    </script>
+  </body>
+</html>

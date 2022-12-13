@@ -1,0 +1,132 @@
+
+
+<body>
+  <div class="uploader-container" id="preview">
+    
+    <div class="icon preview-img" id="add-icon" onclick="inputFile()">
+      <img src="https://cdn.glitch.global/c10e59dc-646a-4d60-89f8-8e987ed1d113/plus.png?v=1670915070878">
+    </div>
+
+  </div>
+  <input type="file" id="uploader" multiple name="file" accept="image/*" >
+</body>
+<style>
+  .uploader-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrapall;
+  }
+  .uploader-container .icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    border: 1px solid #c4c4c4;
+    transition: 0.3s ease;
+    cursor: pointer;
+    width: 80px;
+    height: 80px;
+    box-sizing: border-box;
+  }
+
+  .uploader-container .icon:hover {
+    border: 2px solid #fb7299;
+  }
+
+  .uploader-container .icon img {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .preview {
+    display: flex;
+    flex-direction: row;
+    width: auto;
+  }
+
+  .preview-img {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    position: relative;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .preview-img img {
+    height: 60px;
+    width: 60px;
+  }
+
+  .preview-img .delete-img {
+    position: absolute;
+    right: 5px;
+    top: 5px;
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+  }
+
+  #uploader {
+    visibility: hidden;
+    position: absolute;
+  }
+  
+</style>
+<script>
+  const uploader = document.getElementById('uploader')
+  const preview = document.getElementById('preview')
+  const addIcon = document.getElementById('add-icon')
+  let files = []
+  let fileData = []
+  
+  uploader.addEventListener('change', onInputFile)
+
+  function inputFile () {
+    uploader.click()
+  }
+
+  function onInputFile (e) {
+    files = [...uploader.files]
+    for (let i = 0; i < files.length; i++) {
+      const reader = new FileReader()            
+      reader.readAsDataURL(files[i])
+      reader.onload = function (e) {
+        fileData[i] = this.result
+      }
+    }
+    setPreview()
+  }
+
+  function setPreview () {
+    let i = 0
+    for (const file of files) {
+      createNewImg(file, i++)
+    }
+  }
+
+  function createNewImg (file, i) {
+    const child = document.createElement('div')
+    child.classList.add('preview-img')
+    const img = document.createElement('img')
+    const deleteImg = document.createElement('img')
+    deleteImg.classList.add('delete-img')
+    deleteImg.src = "https://cdn.glitch.global/c10e59dc-646a-4d60-89f8-8e987ed1d113/delete.png?v=1670902721596"
+    deleteImg.onclick = function () {
+      files.splice(i, 1)
+      fileData.splice(i, 1)
+      child.remove()
+      
+    }
+    child.appendChild(deleteImg)
+    img.alt = file.name
+    preview.insertBefore(child, addIcon)
+    child.appendChild(img)
+    const reader = new FileReader()            
+    reader.readAsDataURL(file)
+    reader.onload = function (e) {
+      img.src = this.result
+    }
+    
+  }
+</script>
